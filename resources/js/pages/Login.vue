@@ -28,17 +28,20 @@
              
               </div>
               <div class="input-group input-group-merge">
-                <input type="password" id="password" v-model="password" class="form-control" name="password" placeholder="·······" aria-describedby="password">
-                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                <input :type="show_pass" id="password" v-model="password" class="form-control" name="password" placeholder="·······" aria-describedby="password">
+                <span class="input-group-text cursor-pointer" @click="show_pass=='password'?show_pass='text':show_pass='password'" >
+                  <i class="bx bx-hide" v-if="show_pass=='password'"></i>
+                  <i class='bx bx-show' v-if="show_pass=='text'"></i>
+                </span>
               </div>
             </div>
 
-            <div class="alert alert-warning" role="alert" v-if="text_error">
-                {{ text_error }}
+            <div class="alert alert-warning" role="alert" v-if="text_error || check_email || check_pass">
+                {{ text_error }} {{ check_email }} {{ check_pass }} 
             </div>
        
             <div class="mb-3">
-              <button class="btn btn-primary d-grid w-100" type="submit" @click="Login()">ເຂົ້າສູ່ລະບົບ</button>
+              <button class="btn btn-primary d-grid w-100" type="submit" :disabled="check_bt" @click="Login()">ເຂົ້າສູ່ລະບົບ</button>
             </div>
        
 
@@ -57,6 +60,17 @@
 </template>
 
 <script>
+
+  // ແບບຍໍ້
+  // show_pass=='password'?show_pass='text':show_pass='password'
+
+  // ແບບເຕັມ
+  // if(show_pass=='password'){
+  //   show_pass='text'
+  // } else {
+  //   show_pass='password'
+  // }
+
 import axios from 'axios';
 export default {
     name: 'Minipos13Login',
@@ -68,13 +82,43 @@ export default {
             text_error:'',
             check_email:'',
             check_pass:'',
+            show_pass:'password'
         };
     },
 
     mounted() {
         
     },
+    computed:{
+      check_bt(){
+          var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+          // ກວດ ອີເມວລ໌
+          if(this.email){ 
+            if(!emailRegex.test(this.email)){
+              this.check_email = 'ອີເມວລ໌ບໍ່ຖຶກຕ້ອງ!'
+            } else {
+              this.check_email = ''
+            }
+          }
+
+          // ກວດລະຫັດຜ່ານ
+          if(this.password){
+            if(this.password.length < 6){
+              this.check_pass = 'ລະຫັດຜ່ານຕ້ອງຫຼາຍກ່ວາ 6 ຕົວອັກສອນ!'
+            }else{
+              this.check_pass = ''
+            }
+          }
+
+          // ທຳການປິດປຸ່ມ ຖ້າຂໍ້ມູນບໍ່ຖຶກຕ້ອງ
+          if(!emailRegex.test(this.email) || this.password.length < 6){
+            return true;
+          } else {
+            return false;
+          }
+      }
+    },
     methods: {
         Login(){
             
@@ -86,6 +130,18 @@ export default {
                     console.log(res)
                     if(res.data.success){
 
+                      this.email = ''
+                      this.password = ''
+                      this.check_email = ''
+                      this.check_pass = ''
+                      this.text_error = ''
+
+                      // ບັນທຶກ token ແລະ ຂໍ້ມູນ User ໄວ້ທີ່ LocalStorage
+                      localStorage.setItem('web_token', res.data.token)
+                      localStorage.setItem('web_user', JSON.stringify(res.data.user))
+
+                      // ໄປທີ່ໜ້າທຳອິດ
+                      this.$router.push('/')
 
                     } else {
                         this.text_error = res.data.message

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('data');
             $table->string('image')->nullable();
             $table->integer('amount');
             $table->integer('price_buy');
