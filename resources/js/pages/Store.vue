@@ -8,26 +8,32 @@
             <button type="button" class="btn btn-success me-2" @click="SaveStore()" :disabled="CheckForm" >ບັນທຶກ</button>
             <button type="button" class="btn btn-secondary" @click="CancelStore()">ຍົກເລີກ</button>
         </div>
-        {{ FormStore }}
-        <hr>
+        <!-- {{ FormStore }}
+        <hr> -->
         <div class="row">
-            <div class=" col-md-4">Image</div>
+            <div class=" col-md-4 text-center" style=" position: relative;">
+              <button type="button" class="btn rounded-pill btn-icon btn-danger" v-if="FormStore.image" @click="RemoveImage()" style="position: absolute;right: 0px;">
+                <i class='bx bxs-x-circle fs-4'></i>
+              </button>
+              <img :src="image_pre" class=" rounded cursor-pointer" @click="$refs.img_store.click()" style=" width: 80%;" alt="">
+              <input type="file" ref="img_store" style=" display: none;" @change="onSelect">
+            </div>
             <div class=" col-md-8"> 
 
                 <div>
           <label  class="form-label fs-6">ຊື່ສິນຄ້າ: <span class="text-danger">*</span></label>
           <input type="text" class="form-control mb-2" v-model="FormStore.name"  placeholder=".....">
           <label  class="form-label fs-6">ຈຳນວນ: <span class="text-danger">*</span></label>
-          <input type="text" class="form-control mb-2" v-model="FormStore.amount" placeholder=".....">
+          <cleave :options="options" class="form-control mb-2" v-model="FormStore.amount" placeholder="....."/>
                     
           <div class="row">
             <div class="col-md-6">
                 <label  class="form-label fs-6">ລາຄາຊື້: <span class="text-danger">*</span></label>
-                <input type="text" class="form-control mb-2" v-model="FormStore.price_buy"  placeholder=".....">
+                <cleave :options="options" class="form-control mb-2" v-model="FormStore.price_buy"  placeholder="....."/>
             </div>
             <div class="col-md-6">
                 <label  class="form-label fs-6">ລາຄາຂາຍ: <span class="text-danger">*</span></label>
-                <input type="text" class="form-control mb-2" v-model="FormStore.price_sell"  placeholder=".....">
+                <cleave :options="options"  class="form-control mb-2" v-model="FormStore.price_sell"  placeholder="....."/>
             </div>
           </div>
         </div>
@@ -67,7 +73,11 @@
         <tbody>
           <tr v-for="list in StoreData.data" :key="list.id">
             <td> {{ list.id }} </td>
-            <td></td>
+            <td> 
+              
+              <img :src="url + '/assets/img/'+list.image" v-if="list.image" style=" width: 100%;" class=" rounded" alt="">
+              <img :src="url + '/assets/img/image_pre.png'" v-else style=" width: 100%;" class=" rounded" alt="">
+            </td>
             <td>
                 {{ list.name }}
             </td>
@@ -95,6 +105,7 @@
 <script>
 import axios from 'axios';
 import { useStore } from '../store/auth';
+import Cleave from 'vue-cleave-component';
 export default {
     name: 'Minipos13Store',
     setup(){
@@ -103,6 +114,8 @@ export default {
     },
     data() {
         return {
+        url: window.location.origin,
+        image_pre: window.location.origin + '/assets/img/image_pre.png',
         ShowForm:false,
         FormType:true,
         Sort:'asc',
@@ -116,14 +129,27 @@ export default {
             amount:'',
             price_buy:'',
             price_sell:'',
-         }   
+         },
+         options: {
+                   //   prefix: '₭ ',
+                  numeral: true,
+                  numeralPositiveOnly: true,
+                  noImmediatePrefix: true,
+                  rawValueTrimPrefix: true,
+                  numeralIntegerScale: 10,
+                  numeralDecimalScale: 2,
+                  numeralDecimalMark: ',',
+                  delimiter: '.'
+                }   
         };
     },
 
     mounted() {
         
     },
-
+    components:{
+      Cleave
+    },
     computed:{
         CheckForm(){
             if(this.FormStore.name == '' || this.FormStore.amount == '' || this.FormStore.price_buy == '' || this.FormStore.price_sell ==''){
@@ -135,6 +161,20 @@ export default {
     },
 
     methods: {
+      onSelect(event){
+        // console.log(event)
+        this.FormStore.image = event.target.files[0];
+        let reader = new FileReader();
+        reader.readAsDataURL(this.FormStore.image);
+        reader.addEventListener("load", function(){
+          this.image_pre = reader.result;
+        }.bind(this), false);
+
+      },
+      RemoveImage(){
+        this.FormStore.image = ''
+        this.image_pre = window.location.origin + '/assets/img/image_pre.png'
+      },
       formatPrice(value) {
             let val = (value / 1).toFixed(0).replace(",", ".");
             return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -192,6 +232,13 @@ export default {
               this.FormStore = res.data 
               this.ShowForm = true
 
+              // ກວດຊອບຮູບພາບ ເພື່ອດຶງໄປສະແດງຜົນ
+              if(res.data.image){
+                this.image_pre = this.url + '/assets/img/' + res.data.image
+              } else {
+                this.image_pre = this.url + '/assets/img/image_pre.png'
+              }
+
             }).catch((error)=>{
               console.log(error)
             })
@@ -248,14 +295,11 @@ export default {
                 if(this.FormType){
                     /// add new
 
-                    axios.post('api/store/add', this.FormStore,{ headers:{ Authorization: 'Bearer '+ this.store.get_token}}).then((res)=>{
-
+                    axios.post('api/store/add', this.FormStore,{ headers:{ "content-type":"multipart/form-data", Authorization: 'Bearer '+ this.store.get_token}}).then((res)=>{
                         console.log(res.data);
-
                         if(res.data.success){
                           this.GetStore()
                            this.ShowForm = false 
-
                            this.$swal({
                             position: 'top-end',
                             toast: true,
@@ -285,7 +329,7 @@ export default {
                 } else {
                     /// update data
 
-                    axios.post(`api/store/update/${this.EditID}`, this.FormStore,{ headers:{ Authorization: 'Bearer '+ this.store.get_token}}).then((res)=>{
+                    axios.post(`api/store/update/${this.EditID}`, this.FormStore,{ headers:{ "content-type":"multipart/form-data", Authorization: 'Bearer '+ this.store.get_token}}).then((res)=>{
 
                         console.log(res.data);
 
