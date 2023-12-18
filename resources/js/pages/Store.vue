@@ -217,6 +217,8 @@ export default {
             this.FormStore.price_buy = ''
             this.FormStore.price_sell = ''
 
+            this.image_pre = this.url + '/assets/img/image_pre.png'
+
             this.ShowForm = true
             this.FormType = true
         },
