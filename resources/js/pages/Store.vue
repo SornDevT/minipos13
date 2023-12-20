@@ -242,7 +242,16 @@ export default {
               }
 
             }).catch((error)=>{
-              console.log(error)
+              console.log(error);
+              if(error){
+                            if(error.response.status == 401){
+                                this.store.remove_token();
+                                this.store.remove_user();
+                                localStorage.removeItem("web_token");
+                                localStorage.removeItem("web_user");
+                                this.$router.push("/login");
+                            }
+                        }
             })
 
         },
@@ -283,7 +292,16 @@ export default {
                           }
 
                         }).catch((error)=>{
-                          console.log(error)
+                          console.log(error);
+                          if(error){
+                            if(error.response.status == 401){
+                                this.store.remove_token();
+                                this.store.remove_user();
+                                localStorage.removeItem("web_token");
+                                localStorage.removeItem("web_user");
+                                this.$router.push("/login");
+                            }
+                        }
                         })
 
                         
@@ -326,6 +344,15 @@ export default {
 
                     }).catch((error)=>{
                         console.log(error);
+                        if(error){
+                            if(error.response.status == 401){
+                                this.store.remove_token();
+                                this.store.remove_user();
+                                localStorage.removeItem("web_token");
+                                localStorage.removeItem("web_user");
+                                this.$router.push("/login");
+                            }
+                        }
                     })
 
                 } else {
@@ -361,6 +388,15 @@ export default {
 
                         }).catch((error)=>{
                         console.log(error);
+                        if(error){
+                            if(error.response.status == 401){
+                                this.store.remove_token();
+                                this.store.remove_user();
+                                localStorage.removeItem("web_token");
+                                localStorage.removeItem("web_user");
+                                this.$router.push("/login");
+                            }
+                        }
                         })
 
                 }
@@ -373,6 +409,15 @@ export default {
 
             }}).catch((error)=>{
               console.log(error)
+              if(error){
+                            if(error.response.status == 401){
+                                this.store.remove_token();
+                                this.store.remove_user();
+                                localStorage.removeItem("web_token");
+                                localStorage.removeItem("web_user");
+                                this.$router.push("/login");
+                            }
+                        }
             })
         }
     },
