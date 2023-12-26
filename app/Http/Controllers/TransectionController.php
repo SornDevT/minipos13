@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transection;
-use App\MOdels\Bill;
-use App\MOdels\Bill_list;
+use App\Models\Bill;
+use App\Models\Bill_list;
 use App\Models\Store;
 
 class TransectionController extends Controller
